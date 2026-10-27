@@ -9,7 +9,7 @@ function harness(deferPosts=false) {
   const requests=[]
   global.Page=value=>{page=value}
   global.wx={getStorageSync:key=>storage[key],setStorageSync:(key,value)=>{storage[key]=value},
-    removeStorageSync:key=>{delete storage[key]},request:options=>{requests.push(options);if(options.method==='POST' && !deferPosts) options.fail();else if(options.url.includes('schedules')) options.success({statusCode:200,data:{items:[]}})},
+    removeStorageSync:key=>{delete storage[key]},request:options=>{requests.push(options);if(options.url.endsWith('/members')) {options.success({statusCode:200,data:{items:[]}});return}if(options.method==='POST' && !deferPosts) options.fail();else if(options.url.includes('schedules')) options.success({statusCode:200,data:{items:[]}})},
     showModal:options=>options.success({confirm:true,content:'新姓名'})}
   for(const file of ['../pages/company/index','../services/api']) delete require.cache[require.resolve(file)]
   require('../pages/company/index')
@@ -21,6 +21,26 @@ test('personal is the launch page with personal, company and schedule tabs',()=>
   const config=JSON.parse(fs.readFileSync(path.join(__dirname,'../app.json'),'utf8'))
   assert.equal(config.pages[0],'pages/personal/index')
   assert.deepEqual(config.tabBar.list.map(item=>item.text),['个人','公司','排班'])
+})
+
+test('company roster displays all member roles and clears on company or account changes',async()=>{
+  const {page,requests,storage}=harness()
+  // Supply roster responses manually to exercise late-response isolation.
+  global.wx.request=o=>requests.push(o)
+  let pending=page.load();ok(requests[0],{items:[{id:1,role:'owner'},{id:2,role:'member'}]})
+  await new Promise(resolve=>setImmediate(resolve))
+  ok(requests[1],{items:[{user_id:7,display_name:'同名',role:'operator'},{user_id:8,display_name:'同名',role:'member'}]})
+  await pending;assert.equal(page.data.members.length,2)
+  pending=page.switchCompany({detail:{value:1}});assert.deepEqual(page.data.members,[])
+  ok(requests[2],{items:[{id:1,role:'owner'},{id:2,role:'member'}]});await pending
+  assert.deepEqual(page.data.members,[]);assert.equal(requests.length,3)
+  storage['company-1']=1
+  pending=page.load();ok(requests[3],{items:[{id:1,role:'owner'}]})
+  await new Promise(resolve=>setImmediate(resolve))
+  storage.user={id:2};storage.token='next'
+  const fresh=page.load();ok(requests[5],{items:[]});await fresh
+  ok(requests[4],{items:[{user_id:99,display_name:'旧名单'}]});await pending
+  assert.deepEqual(page.data.members,[])
 })
 
 test('account switch clears an uncertain company form and prevents retry as the new user',async()=>{
@@ -97,7 +117,7 @@ test('company info is lightweight for operators and does not request schedules',
   const {page,requests}=harness()
   const pending=page.load();ok(requests[0],{items:[{id:1,name:'公司甲',role:'operator'}]});await pending
   assert.equal(page.data.manage,true)
-  assert.equal(requests.length,1)
+  assert.equal(requests.length,2)
   assert.equal(typeof page.add,'undefined')
 })
 

@@ -76,6 +76,47 @@ function filterHarness(role='owner') {
   return {...h,rooms,setRows(value){rows=value}}
 }
 const selectRoom=(page,key)=>page.selectRoom({currentTarget:{dataset:{key}}})
+const selectAnchor=(page,key)=>page.selectAnchor({currentTarget:{dataset:{key}}})
+
+test('anchor choices use membership IDs including duplicate names and unscheduled members',async()=>{
+  let members=[{user_id:7,display_name:'同名'},{user_id:8,display_name:'同名'},{user_id:9,display_name:'暂无安排'}]
+  const h=harness('schedule','operator',o=>{
+    const data=o.url.endsWith('/companies')?{items:[{id:1,role:'operator'},{id:2,role:'operator'}]}:
+      o.url.endsWith('/members')?{items:members}:o.url.includes('/rooms')?{items:[{id:3,active:true,name:'一号'}]}:
+      {items:[{id:1,user_id:7,room_id:3,start_at:'2030-01-01T10:00:00+08:00',end_at:'2030-01-01T11:00:00+08:00',status:'active',has_room_conflict:true}]}
+    o.success({statusCode:200,data});return true
+  })
+  h.page.setData({selectedDay:'2030-01-01'});await h.page.load()
+  const count=h.requests.length
+  selectAnchor(h.page,7);assert.equal(h.page.data.groups[0].items[0].hasConflict,true)
+  selectAnchor(h.page,8);assert.deepEqual(h.page.data.groups,[])
+  selectAnchor(h.page,9);assert.equal(h.page.data.anchorFilterKey,9)
+  assert.equal(h.requests.length,count)
+  await h.page.load();assert.equal(h.page.data.anchorFilterKey,9)
+  members=members.filter(m=>m.user_id!==9);await h.page.load();assert.equal(h.page.data.anchorFilterKey,'all')
+  selectAnchor(h.page,7);await h.page.switchCompany({currentTarget:{dataset:{index:1}}})
+  assert.equal(h.page.data.anchorFilterKey,'all')
+  h.page.toggleAnchorMenu();assert.equal(h.page.data.anchorMenuOpen,true)
+  h.page.toggleRoomMenu();assert.equal(h.page.data.anchorMenuOpen,false)
+  h.page.toggleAnchorMenu();h.page.onPageScroll();assert.equal(h.page.data.anchorMenuOpen,false)
+})
+
+test('weekly mode queries Monday to Monday and adds to the displayed group date',async()=>{
+  const {page,requests,links}=filterHarness();await page.load()
+  await page.setViewMode({currentTarget:{dataset:{mode:'week'}}})
+  const q=decodeURIComponent(requests.filter(r=>r.url.includes('/schedules')).at(-1).url)
+  assert.match(q,/2029-12-31T00:00:00\+08:00/);assert.match(q,/2030-01-07T00:00:00\+08:00/)
+  page.add({currentTarget:{dataset:{room:3,date:'2030-01-04'}}})
+  assert.match(links.at(-1),/date=2030-01-04/)
+  await page.day({currentTarget:{dataset:{days:1}}});assert.equal(page.data.selectedDay,'2030-01-08')
+})
+
+test('ordinary members never fetch the roster or select another anchor',async()=>{
+  const {page,requests}=filterHarness('member');await page.load()
+  assert.equal(requests.some(r=>r.url.endsWith('/members')),false)
+  page.toggleAnchorMenu();selectAnchor(page,9)
+  assert.equal(page.data.anchorMenuOpen,false);assert.equal(page.data.anchorFilterKey,'all')
+})
 
 test('room filter defaults all and switches locally including empty, archived and unassigned groups',async()=>{
   const {page,requests}=filterHarness();await page.load()

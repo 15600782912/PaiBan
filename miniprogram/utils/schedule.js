@@ -23,4 +23,26 @@ function groupSchedules(rooms,items,date,manage) {
   for(const group of groups) group.items.sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at) || a.id-b.id)
   return groups
 }
-module.exports={groupSchedules}
+function scheduleView(rooms,items,date,mode,manage,anchor,roomKey,showCancelled) {
+  const {weekRange}=require('./time')
+  const range=mode==='week'?weekRange(date):{start:date,end:moveDay(date,1)}
+  const lo=Date.parse(toISO(range.start,'00:00')),hi=Date.parse(toISO(range.end,'00:00'))
+  const scoped=items.filter(row=>Date.parse(row.start_at)<hi && Date.parse(row.end_at)>lo &&
+    (anchor==='all' || row.user_id===Number(anchor)) &&
+    (roomKey==='all' || (row.room_id==null?'unassigned':'room-'+row.room_id)===roomKey))
+  const cancelledCount=scoped.filter(row=>row.status==='cancelled').length
+  const groups=[]
+  for(let day=range.start;day<range.end;day=moveDay(day,1)) {
+    const daily=groupSchedules(rooms,scoped,day,manage).filter(g=>roomKey==='all' || g.key===roomKey)
+    for(const group of daily) {
+      const cancelled=group.items.filter(row=>row.status==='cancelled').length
+      const visible=group.items.filter(row=>showCancelled || row.status!=='cancelled')
+      if(!visible.length && (anchor!=='all' || !manage || !group.active)) continue
+      groups.push({...group,key:mode==='week'?day+'|'+group.key:group.key,date:day,
+        dayLabel:mode==='week'?day:'',items:visible,cancelledCount:cancelled,
+        hasConflict:visible.some(row=>row.hasConflict)})
+    }
+  }
+  return {...range,groups,cancelledCount,activeCount:scoped.length-cancelledCount}
+}
+module.exports={groupSchedules,scheduleView}

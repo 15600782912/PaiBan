@@ -23,3 +23,12 @@ button.company-menu-option.is-selected { background:#edf6f0; color:#12664f; }
 .room-filter-menu { left:auto; right:0; }
 
 button.cancelled-toggle { display:inline-flex; align-items:center; width:auto; margin:16rpx 0; }
+
+.company-menu { box-sizing:border-box; }
+.member-filters { z-index:32; }
+.schedule-filters:not(.member-filters) { z-index:34; }
+.schedule-filters:not(.member-filters) button.company-filter-pill { max-width:100%; }
+.view-modes { display:flex; gap:8rpx; background:#e8eee9; border-radius:18rpx; padding:6rpx; margin:24rpx 0 16rpx; width:240rpx; }
+.view-modes button { flex:1; min-width:0; margin:0; padding:0; line-height:64rpx; font-size:26rpx; background:transparent; color:#596e63; }
+.view-modes button.selected { background:#fff; color:#12664f; }
+.schedule-day-label { color:#12664f; font-weight:600; margin-bottom:16rpx; }

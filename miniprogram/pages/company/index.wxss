@@ -1,0 +1,3 @@
+.member-row { gap:20rpx; padding:20rpx 0; border-top:1rpx solid #edf0ed; }
+.member-name { flex:1; min-width:0; overflow-wrap:anywhere; }
+.member-row .badge { flex-shrink:0; }

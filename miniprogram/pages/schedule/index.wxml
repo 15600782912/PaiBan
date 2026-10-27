@@ -1,22 +1,33 @@
 <view class="page" bindtap="closeMenus">
-  <view class="header"><view class="eyebrow">LIVE ROOM SCHEDULES</view><view class="title">直播间排班</view><view class="subtitle">按直播间查看当天安排 · 北京时间</view></view>
+  <view class="header"><view class="eyebrow">LIVE ROOM SCHEDULES</view><view class="title">直播间排班</view><view class="subtitle">按主播与直播间查看安排 · 北京时间</view></view>
   <view wx:if="{{error}}" class="error">{{error}}</view>
   <view wx:if="{{!loggedIn}}" class="card stack"><view class="muted">登录后查看公司安排。</view><button bindtap="login" loading="{{accountBusy}}" disabled="{{accountBusy}}">{{loginLabel}}</button></view>
   <block wx:else>
     <view class="company-filter-row schedule-filters" wx:if="{{companies.length}}">
       <button class="company-filter-pill" catchtap="toggleCompanyMenu" disabled="{{loading}}" aria-expanded="{{companyMenuOpen}}" aria-label="选择公司"><text class="company-filter-name">{{current ? current.name : '选择公司'}}</text><text class="company-filter-arrow">⌄</text></button>
-      <button wx:if="{{current}}" class="company-filter-pill" catchtap="toggleRoomMenu" disabled="{{loading}}" aria-expanded="{{roomMenuOpen}}" aria-haspopup="listbox" aria-label="选择直播间，当前：{{roomFilterLabel}}"><text class="company-filter-name">{{roomFilterLabel}}</text><text class="company-filter-arrow">{{roomMenuOpen ? '⌃' : '⌄'}}</text></button>
+
       <view wx:if="{{companyMenuOpen}}" class="company-menu" catchtap="stopTap" role="listbox" aria-label="公司列表"><scroll-view class="company-menu-options" style="height:{{companies.length * 96}}rpx" scroll-y><button wx:for="{{companies}}" wx:key="id" class="company-menu-option {{index === companyIndex ? 'is-selected' : ''}}" data-index="{{index}}" bindtap="switchCompany" aria-selected="{{index === companyIndex}}"><text class="company-menu-option-name">{{item.name}}</text><text wx:if="{{index === companyIndex}}" class="company-menu-check">✓</text></button></scroll-view></view>
+
+    </view>
+    <view wx:if="{{current}}" class="company-filter-row schedule-filters member-filters">
+      <button wx:if="{{manage}}" class="company-filter-pill" catchtap="toggleAnchorMenu" disabled="{{loading}}" aria-expanded="{{anchorMenuOpen}}" aria-label="选择主播，当前：{{anchorFilterLabel}}"><text class="company-filter-name">{{anchorFilterLabel}}</text><text class="company-filter-arrow">⌄</text></button>
+      <button wx:if="{{current}}" class="company-filter-pill" catchtap="toggleRoomMenu" disabled="{{loading}}" aria-expanded="{{roomMenuOpen}}" aria-haspopup="listbox" aria-label="选择直播间，当前：{{roomFilterLabel}}"><text class="company-filter-name">{{roomFilterLabel}}</text><text class="company-filter-arrow">{{roomMenuOpen ? '⌃' : '⌄'}}</text></button>
+      <view wx:if="{{anchorMenuOpen}}" class="company-menu" catchtap="stopTap" role="listbox" aria-label="主播列表"><scroll-view class="company-menu-options" style="height:{{(members.length + 1) * 96}}rpx" scroll-y>
+        <button class="company-menu-option {{anchorFilterKey === 'all' ? 'is-selected' : ''}}" data-key="all" bindtap="selectAnchor" role="option" aria-selected="{{anchorFilterKey === 'all'}}"><text>全部主播</text><text wx:if="{{anchorFilterKey === 'all'}}" class="company-menu-check">✓</text></button>
+        <button wx:for="{{members}}" wx:key="user_id" class="company-menu-option {{item.user_id === anchorFilterKey ? 'is-selected' : ''}}" data-key="{{item.user_id}}" bindtap="selectAnchor" role="option" aria-selected="{{item.user_id === anchorFilterKey}}"><text class="company-menu-option-name">{{item.display_name}}</text><text wx:if="{{item.user_id === anchorFilterKey}}" class="company-menu-check">✓</text></button>
+      </scroll-view></view>
       <view wx:if="{{roomMenuOpen}}" class="company-menu room-filter-menu" catchtap="stopTap" role="listbox" aria-label="直播间列表"><scroll-view class="company-menu-options" style="height:{{roomOptions.length * 96}}rpx" scroll-y><button wx:for="{{roomOptions}}" wx:key="key" class="company-menu-option {{item.key === roomFilterKey ? 'is-selected' : ''}}" data-key="{{item.key}}" bindtap="selectRoom" role="option" aria-selected="{{item.key === roomFilterKey}}"><text class="company-menu-option-name">{{item.name}}</text><text wx:if="{{item.key === roomFilterKey}}" class="company-menu-check">✓</text></button></scroll-view></view>
     </view>
     <view wx:if="{{loading}}" class="muted">正在加载…</view>
     <block wx:if="{{current}}">
-      <view class="schedule-date-bar"><button class="secondary schedule-week-button" data-days="-1" bindtap="day">‹ 前一天</button><picker class="schedule-date-picker" mode="date" value="{{selectedDay}}" bindchange="selectDay"><view class="schedule-date-value"><text>{{selectedDay}}</text><text class="schedule-date-arrow">▾</text></view></picker><button class="secondary schedule-week-button" data-days="1" bindtap="day">后一天 ›</button></view>
-      <view class="schedule-heading"><text class="muted">{{manage ? '公司当天安排' : '仅显示本人的安排'}}</text><button wx:if="{{manage}}" class="text small" bindtap="manageRooms">直播间管理 ›</button></view>
+      <view class="view-modes"><button class="{{viewMode === 'day' ? 'selected' : ''}}" data-mode="day" bindtap="setViewMode" disabled="{{loading}}">当天</button><button class="{{viewMode === 'week' ? 'selected' : ''}}" data-mode="week" bindtap="setViewMode" disabled="{{loading}}">本周</button></view>
+      <view wx:if="{{viewMode === 'week'}}" class="muted">{{rangeLabel}}</view>
+      <view class="schedule-date-bar"><button class="secondary schedule-week-button" data-days="-1" bindtap="day">‹ {{viewMode === 'week' ? '上周' : '前一天'}}</button><picker class="schedule-date-picker" mode="date" value="{{selectedDay}}" bindchange="selectDay"><view class="schedule-date-value"><text>{{selectedDay}}</text><text class="schedule-date-arrow">▾</text></view></picker><button class="secondary schedule-week-button" data-days="1" bindtap="day">{{viewMode === 'week' ? '下周' : '后一天'}} ›</button></view>
+      <view class="schedule-heading"><text class="muted">{{manage ? '公司排班' : '仅显示本人的安排'}}</text><button wx:if="{{manage}}" class="text small" bindtap="manageRooms">直播间管理 ›</button></view>
       <button wx:if="{{cancelledCount}}" class="text small cancelled-toggle" bindtap="toggleCancelled" aria-expanded="{{showCancelled}}">{{showCancelled ? '收起已取消' : '查看已取消'}}（{{cancelledCount}}）</button>
       <view wx:if="{{!loading && !activeCount && cancelledCount && !showCancelled}}" class="muted">暂无有效排班，另有{{cancelledCount}}条已取消</view>
       <view wx:for="{{groups}}" wx:for-item="room" wx:key="key" class="room-group">
-        <view class="row"><text class="room-title">{{room.name}}{{room.id !== null && !room.active ? '（已停用）' : ''}}</text><button wx:if="{{manage && room.active}}" class="text small" data-room="{{room.id}}" bindtap="add">＋ 排班</button></view>
+        <view wx:if="{{room.dayLabel}}" class="schedule-day-label">{{room.dayLabel}}</view><view class="row"><text class="room-title">{{room.name}}{{room.id !== null && !room.active ? '（已停用）' : ''}}</text><button wx:if="{{manage && room.active}}" class="text small" data-room="{{room.id}}" data-date="{{room.date}}" bindtap="add">＋ 排班</button></view>
         <view wx:if="{{room.hasConflict}}" class="warning">存在重叠安排，请检查冲突时段。</view>
         <view wx:for="{{room.items}}" wx:for-item="record" wx:key="id" class="room-record {{record.status === 'cancelled' ? 'cancelled' : ''}}" data-id="{{record.id}}" bindtap="edit">
           <view class="row"><text class="record-time">{{record.display_name}}</text><text class="badge">{{record.status === 'cancelled' ? '已取消' : '已安排'}}</text></view>
@@ -25,9 +36,9 @@
           <view wx:if="{{record.hasConflict}}" class="warning">{{record.has_room_conflict ? '直播间时间冲突' : '主播时间冲突'}}，请协调安排。</view>
           <view wx:if="{{manage}}" class="row" style="margin-top:12rpx"><text class="muted">{{record.status === 'cancelled' ? '查看记录' : '编辑排班'}} ›</text><button wx:if="{{record.status === 'active'}}" class="text small" data-id="{{record.id}}" catchtap="copySchedule">复制排班</button></view>
         </view>
-        <view wx:if="{{!room.items.length}}" class="room-empty">{{room.cancelledCount ? '暂无有效排班，另有' + room.cancelledCount + '条已取消' : '当天暂无排班'}}</view>
+        <view wx:if="{{!room.items.length}}" class="room-empty">{{room.cancelledCount ? '暂无有效排班，另有' + room.cancelledCount + '条已取消' : '暂无排班'}}</view>
       </view>
-      <view wx:if="{{!loading && !groups.length && !error}}" class="empty">{{cancelledCount ? '暂无有效排班，另有' + cancelledCount + '条已取消' : (roomFilterKey !== 'all' ? '该直播间当天暂无排班' : (manage ? '还没有直播间，请先在直播间管理中添加' : '当天暂无本人排班'))}}</view>
+      <view wx:if="{{!loading && !groups.length && !error}}" class="empty">{{cancelledCount ? '暂无有效排班，另有' + cancelledCount + '条已取消' : (anchorFilterKey !== 'all' ? '该主播在当前筛选范围暂无排班' : (roomFilterKey !== 'all' ? '该直播间在当前范围暂无排班' : (manage ? '暂无排班或可用直播间' : '当前范围暂无本人排班')))}}</view>
     </block>
     <view wx:elif="{{!loading && !error}}" class="empty">还没有加入公司<button class="secondary" bindtap="goCompany">前往公司</button></view>
     <button wx:if="{{error && !loading}}" class="secondary" bindtap="load">重新加载</button>

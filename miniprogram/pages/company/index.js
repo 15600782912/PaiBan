@@ -2,7 +2,7 @@ const {api,signedIn,login,newKey,confirm,errorMessage,loginLabel} = require('../
 const {beijingParts} = require('../../utils/time')
 
 Page({
-  data:{name:'',accountBusy:false,loggedIn:false,loading:false,error:'',companies:[],companyIndex:0,current:null,items:[],loginLabel,
+  data:{name:'',accountBusy:false,loggedIn:false,loading:false,error:'',companies:[],companyIndex:0,current:null,members:[],items:[],loginLabel,
     selectedDay:beijingParts().date,weekStart:'',weekEnd:'',singleDay:false,manage:false,
     panel:'',companyName:'',inviteCode:'',submitting:false,uncertain:false},
   actorMatches(actor) {
@@ -12,7 +12,7 @@ Page({
   clearPrivate() {
     this.generation=(this.generation||0)+1
     this.userId=null;this.actorToken=null;this.createKey=null
-    this.setData({name:'',loggedIn:false,loading:false,error:'',companies:[],companyIndex:0,current:null,items:[],manage:false,
+    this.setData({name:'',loggedIn:false,loading:false,error:'',companies:[],companyIndex:0,current:null,members:[],items:[],manage:false,
       panel:'',companyName:'',inviteCode:'',submitting:false,uncertain:false,accountBusy:false,
       selectedDay:beijingParts().date,weekStart:'',weekEnd:'',singleDay:false})
   },
@@ -38,7 +38,7 @@ Page({
     const actor=this.userId
     this.setData({loggedIn:true,name:user.display_name || '主播'})
     const generation=(this.generation||0)+1; this.generation=generation
-    this.setData({loading:true,error:''})
+    this.setData({loading:true,error:'',members:[]})
     try {
       const result=await api('/companies')
       if(generation!==this.generation || !this.actorMatches(actor)) return
@@ -47,6 +47,11 @@ Page({
       const index=Math.max(0,result.items.findIndex(co=>co.id===preferred))
       const current=result.items[index] || null
       this.setData({companies:result.items,companyIndex:index,current,manage:current && current.role!=='member'})
+      if(current && current.role!=='member') {
+        const members=await api(`/companies/${current.id}/members`)
+        if(generation!==this.generation || !this.actorMatches(actor)) return
+        this.setData({members:members.items})
+      }
     } catch(e) {
       if(generation===this.generation) {
         if(!this.actorMatches(actor)) {this.clearPrivate();this.setData({error:errorMessage(e)});return}
@@ -60,7 +65,7 @@ Page({
     if(!this.ensureActor() || !current) return
     const user=wx.getStorageSync('user') || {}
     wx.setStorageSync(`company-${user.id}`,current.id)
-    this.load()
+    return this.load()
   },
   openPanel(e) { if(!this.data.submitting && !this.data.uncertain) { this.createKey=null; this.setData({panel:e.currentTarget.dataset.panel,error:''}) } },
   input(e) { if(!this.data.submitting && !this.data.uncertain) this.setData({[e.currentTarget.dataset.field]:e.detail.value}) },

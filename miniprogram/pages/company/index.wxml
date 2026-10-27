@@ -17,7 +17,12 @@
         <view class="row" style="margin-top:20rpx"><text class="badge">{{current.role === 'owner' ? '创建者' : (current.role === 'operator' ? '可排班成员' : '普通成员')}}</text><button wx:if="{{manage}}" class="text small" bindtap="management">公司管理 ›</button><button wx:else class="text small" bindtap="leave">退出公司</button></view>
       </view>
       <view wx:if="{{current.role === 'owner'}}" class="card"><view class="label">公司邀请码 · 仅创建者可见</view><view class="section">{{current.invite_code}}</view><button class="secondary small" bindtap="copyCode">复制邀请码</button></view>
-
+      <view wx:if="{{manage}}" class="card company-members">
+        <view class="section">公司成员（{{members.length}}）</view>
+        <view wx:if="{{loading}}" class="muted">正在加载成员…</view>
+        <view wx:for="{{members}}" wx:key="user_id" class="row member-row"><text class="member-name">{{item.display_name}}</text><text class="badge">{{item.role === 'owner' ? '创建者' : (item.role === 'operator' ? '可排班成员' : '普通成员')}}</text></view>
+        <view wx:if="{{!loading && !error && !members.length}}" class="muted">暂无成员</view>
+      </view>
     </block>
     <view wx:elif="{{!loading}}" class="empty">还没有加入公司<view>输入邀请码，接收属于你的安排</view></view>
   </block>
