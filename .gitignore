@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+!.env.example
+backups/
+backend/data/
+*.log
+miniprogram/project.private.config.json
+node_modules/
