@@ -1,0 +1,13 @@
+.page { min-height:100vh; }
+.company-filter-row { position:relative; display:flex; align-items:center; margin-top:24rpx; }
+button.company-filter-pill { display:inline-flex; align-items:center; gap:12rpx; flex:0 1 auto; width:auto; min-width:0; max-width:70%; height:64rpx; padding:0 24rpx; margin:0; border-radius:999rpx; background:#e8eee9; color:#2c5341; font-size:26rpx; line-height:64rpx; }
+.company-filter-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.company-filter-arrow { flex-shrink:0; color:#78857e; font-size:24rpx; }
+.company-menu { position:absolute; top:calc(100% + 12rpx); left:0; z-index:30; width:520rpx; min-width:70%; max-width:100%; padding:8rpx; border:1rpx solid #dfe7e2; border-radius:20rpx; background:#fff; box-shadow:0 12rpx 36rpx rgba(14,31,23,.12); }
+.company-menu-options { display:block; max-height:360rpx; box-sizing:border-box; }
+button.company-menu-option { display:flex; align-items:center; justify-content:space-between; gap:20rpx; width:100%; min-height:88rpx; padding:22rpx 20rpx; margin:0; border-radius:12rpx; background:#fff; color:#192b24; text-align:left; font-size:28rpx; line-height:1.6; }
+button.company-menu-option.is-selected { background:#edf6f0; color:#12664f; }
+.company-menu-option-name { flex:1; min-width:0; white-space:normal; overflow-wrap:anywhere; word-break:break-all; }
+.company-menu-check { flex-shrink:0; color:#12664f; font-size:32rpx; font-weight:600; }
+
+button.cancelled-toggle { display:inline-flex; align-items:center; width:auto; margin:16rpx 0; }

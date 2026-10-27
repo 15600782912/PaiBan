@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/personal/index",
+    "pages/company/index",
+    "pages/schedule/index",
+    "pages/editor/index",
+    "pages/manage/index",
+    "pages/rooms/index",
+    "pages/test-login/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "播时",
+    "navigationBarBackgroundColor": "#f5f7f6",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f7f6"
+  },
+  "tabBar": {
+    "color": "#78857e",
+    "selectedColor": "#12664f",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/personal/index",
+        "text": "个人"
+      },
+      {
+        "pagePath": "pages/company/index",
+        "text": "公司"
+      },
+      {
+        "pagePath": "pages/schedule/index",
+        "text": "排班"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

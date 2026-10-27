@@ -1,0 +1,37 @@
+<view class="page" bindtap="closeCompanyMenu">
+  <view class="header"><view class="eyebrow">MY SCHEDULES</view><view class="title">我的排班</view><view class="subtitle">查看各公司的工作安排，所有时间均为北京时间。</view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{!loggedIn}}" class="card stack"><view class="muted">登录后查看属于自己的排班。</view><button bindtap="login" loading="{{accountBusy}}" disabled="{{accountBusy}}">{{loginLabel}}</button></view>
+  <block wx:else>
+    <view class="row"><button class="text small" bindtap="rename" disabled="{{accountBusy}}">{{name}} · 修改姓名</button><button class="text small" bindtap="logout" disabled="{{accountBusy}}">退出登录</button></view>
+    <view wx:if="{{loading}}" class="muted">正在加载…</view>
+    <block wx:if="{{companies.length}}">
+      <view class="company-filter-row">
+        <button class="company-filter-pill" catchtap="toggleCompanyMenu" disabled="{{loading || accountBusy}}" aria-label="筛选公司，当前：{{companyOptions[companyIndex].name}}" aria-expanded="{{companyMenuOpen}}" aria-haspopup="listbox"><text class="company-filter-name">{{companyOptions[companyIndex].name}}</text><text class="company-filter-arrow">{{companyMenuOpen ? '⌃' : '⌄'}}</text></button>
+        <view wx:if="{{companyMenuOpen}}" class="company-menu" catchtap="stopTap" role="listbox" aria-label="选择公司">
+          <scroll-view class="company-menu-options" style="height:{{companyOptions.length * 96}}rpx" scroll-y enhanced show-scrollbar="{{false}}">
+            <button wx:for="{{companyOptions}}" wx:key="id" class="company-menu-option {{index === companyIndex ? 'is-selected' : ''}}" data-index="{{index}}" bindtap="selectCompany" role="option" aria-label="{{item.name}}{{index === companyIndex ? '，已选中' : ''}}" aria-selected="{{index === companyIndex}}"><text class="company-menu-option-name">{{item.name}}</text><text wx:if="{{index === companyIndex}}" class="company-menu-check">✓</text></button>
+          </scroll-view>
+        </view>
+      </view>
+      <view class="schedule-date-bar">
+        <button class="secondary schedule-week-button" data-days="-7" bindtap="week">‹ 上周</button>
+        <picker class="schedule-date-picker" mode="date" value="{{selectedDay}}" bindchange="selectDay"><view class="schedule-date-value"><text>{{selectedDay}}</text><text class="schedule-date-arrow">▾</text></view></picker>
+        <button class="secondary schedule-week-button" data-days="7" bindtap="week">下周 ›</button>
+      </view>
+      <view class="row"><text class="muted">{{singleDay ? selectedDay : weekStart + ' — ' + weekEnd}}</text><button class="text small" bindtap="toggleDay">{{singleDay ? '查看整周' : '只看选中日'}}</button></view>
+      <button wx:if="{{cancelledCount}}" class="text small cancelled-toggle" bindtap="toggleCancelled" aria-expanded="{{showCancelled}}">{{showCancelled ? '收起已取消' : '查看已取消'}}（{{cancelledCount}}）</button>
+      <view wx:for="{{items}}" wx:key="id" class="card {{item.status === 'cancelled' ? 'cancelled' : ''}}">
+        <view class="row"><text class="record-time">{{item.company_name}}</text><text class="badge">{{item.status === 'cancelled' ? '已取消' : '已安排'}}</text></view>
+        <view class="muted" style="margin-top:12rpx">{{item.room_name || '待分配直播间'}}{{item.room_id && !item.room_active ? '（已停用）' : ''}}</view>
+        <view class="record-time" style="margin-top:18rpx">{{item.interval}}</view>
+        <view class="muted">时长 · {{item.duration}}</view>
+        <view wx:if="{{item.note}}" class="note">{{item.note}}</view>
+        <view wx:if="{{item.hasConflict}}" class="warning">{{item.has_room_conflict ? '直播间时间重叠，请联系公司协调。' : '与你的其他排班时间重叠，请联系公司协调。'}}</view>
+      </view>
+      <view wx:if="{{!loading && !items.length && !error}}" class="empty">{{cancelledCount ? '暂无有效排班，另有' + cancelledCount + '条已取消' : '这段时间暂无排班'}}</view>
+    </block>
+    <view wx:elif="{{!loading && !error}}" class="empty">还没有加入公司<view>前往公司页输入邀请码，接收排班安排</view><button class="secondary" bindtap="goCompany">前往公司</button></view>
+    <button wx:if="{{error && !loading}}" class="secondary" bindtap="load">重新加载</button>
+  </block>
+</view>

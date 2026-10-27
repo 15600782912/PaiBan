@@ -1,0 +1,16 @@
+<view class="page">
+  <view class="header"><view class="title">直播间管理</view><view class="subtitle">维护本公司的直播间，停用后历史安排仍然保留。</view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{loading}}" class="muted">正在加载…</view>
+  <block wx:if="{{manage}}">
+    <view wx:if="{{uncertain}}" class="warning">保存结果未确认，请保持原内容重试。<button class="secondary small" bindtap="retry" loading="{{busy}}" disabled="{{busy}}">重试原操作</button></view>
+    <view wx:for="{{rooms}}" wx:key="id" class="card">
+      <view class="row"><text class="room-name">{{item.name}}</text><text class="badge">{{item.active ? '使用中' : '已停用'}}</text></view>
+      <view class="actions"><button class="text small" data-id="{{item.id}}" bindtap="openEdit" disabled="{{busy || uncertain}}">修改名称</button><button wx:if="{{item.active}}" class="danger small" data-id="{{item.id}}" bindtap="disable" disabled="{{busy || uncertain}}">停用</button></view>
+    </view>
+    <view wx:if="{{!loading && !rooms.length}}" class="empty">还没有直播间，先添加一个吧</view>
+    <view wx:if="{{editorOpen}}" class="card stack"><view class="section" style="margin-top:0">{{editingId ? '修改直播间' : '添加直播间'}}</view><input value="{{draft}}" bindinput="change" maxlength="80" placeholder="例如 一号直播间" disabled="{{busy || uncertain}}" /><view class="actions"><button class="secondary" bindtap="closeEditor" disabled="{{busy || uncertain}}">取消</button><button bindtap="save" loading="{{busy}}" disabled="{{busy || uncertain}}">保存</button></view></view>
+    <button wx:else bindtap="openAdd" disabled="{{busy || uncertain || loading}}">＋ 添加直播间</button>
+  </block>
+  <button wx:if="{{error && !loading && !uncertain}}" class="secondary" bindtap="load">重新加载</button>
+</view>

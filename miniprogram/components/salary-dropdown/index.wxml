@@ -1,0 +1,7 @@
+<view class="dropdown">
+  <button class="trigger {{disabled ? 'disabled' : ''}}" bindtap="toggle" disabled="{{disabled}}" aria-label="薪资选择" aria-expanded="{{open}}"><text class="label">{{label}}</text><text class="arrow">{{open ? '▴' : '▾'}}</text></button>
+  <scroll-view wx:if="{{open}}" scroll-y class="options">
+    <view wx:for="{{options}}" wx:key="index" class="option {{index === value ? 'selected' : ''}}" data-index="{{index}}" bindtap="select" role="button" aria-label="{{item.label}}"><text>{{item.label}}</text><text wx:if="{{index === value}}" class="check">✓</text></view>
+    <view wx:if="{{!options.length}}" class="empty">暂无薪资选项</view>
+  </scroll-view>
+</view>

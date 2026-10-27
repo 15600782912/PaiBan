@@ -1,0 +1,14 @@
+[Unit]
+Description=Verified SQLite backup for ZhuBo
+
+[Service]
+Type=oneshot
+User=zhubo
+Group=zhubo
+WorkingDirectory=/opt/zhubo/backend
+ExecStart=/opt/zhubo/.venv/bin/python -m app.backup --source data/zhubo.db --output backups --retain-days 30
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/zhubo/backend/data /opt/zhubo/backend/backups
+PrivateTmp=true

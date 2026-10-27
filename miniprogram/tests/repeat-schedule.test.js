@@ -1,0 +1,30 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const {normalizeDates,weeklyDates,buildBatchItems}=require('../utils/repeat-schedule')
+const template={user_id:2,room_id:3,start_at:'2030-01-31T23:00:00+08:00',end_at:'2030-02-01T01:00:00+08:00',note:'晚场'}
+test('manual dates are validated, deduplicated, sorted and limited to sixty',()=>{
+  assert.deepEqual(normalizeDates(['2030-02-02','2030-02-01','2030-02-02']),['2030-02-01','2030-02-02'])
+  assert.throws(()=>normalizeDates([]),/日期/)
+  assert.throws(()=>normalizeDates(['2030-02-30']),/日期/)
+  const dates=Array.from({length:61},(_,i)=>new Date(Date.UTC(2030,0,1+i)).toISOString().slice(0,10))
+  assert.throws(()=>normalizeDates(dates),/60/)
+})
+test('weekly repetition selects requested weekdays inclusively and rejects empty/reversed ranges',()=>{
+  assert.deepEqual(weeklyDates('2030-01-01','2030-01-14',[1,3]),['2030-01-02','2030-01-07','2030-01-09','2030-01-14'])
+  assert.throws(()=>weeklyDates('2030-01-10','2030-01-01',[1]),/结束/)
+  assert.throws(()=>weeklyDates('2030-01-01','2030-01-03',[]),/星期/)
+  assert.throws(()=>weeklyDates('2030-01-01','2030-01-01',[1]),/日期/)
+  assert.throws(()=>weeklyDates('2030-01-01','2030-04-01',[0,1,2,3,4,5,6]),/60/)
+})
+test('batch template preserves overnight and multi-day offsets without carrying update/version fields',()=>{
+  const [item]=buildBatchItems({...template,version:7,confirm_overlap:true},['2030-03-01'])
+  assert.equal(item.start_at,'2030-03-01T23:00:00+08:00')
+  assert.equal(item.end_at,'2030-03-02T01:00:00+08:00')
+  assert.equal(item.user_id,2);assert.equal(item.room_id,3);assert.equal(item.note,'晚场')
+  assert.equal('version' in item,false);assert.equal('confirm_overlap' in item,false)
+  const [multi]=buildBatchItems({...template,end_at:'2030-02-03T01:00:00+08:00'},['2030-03-01'])
+  assert.equal(multi.end_at,'2030-03-04T01:00:00+08:00')
+})
+test('reversed same-day times are never silently interpreted as overnight',()=>{
+  assert.throws(()=>buildBatchItems({...template,end_at:'2030-01-31T01:00:00+08:00'},['2030-03-01']),/结束/)
+})

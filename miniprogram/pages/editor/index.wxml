@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="header"><view class="eyebrow">TEAM SCHEDULE</view><view class="title">{{copyMode ? '复制排班' : (id ? '编辑排班' : '新增排班')}}</view><view class="subtitle">{{copyMode ? '复制只会新建排班，不会修改原场次。' : '保存后，该主播即可查看。'}} 所有时间均为北京时间。</view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{loading}}" class="empty">正在加载…</view>
+  <view wx:if="{{uncertain}}" class="warning">保存结果未确认。已锁定原内容，请点击重试，避免重复创建。</view>
+  <view wx:if="{{cancelled}}" class="warning">这条排班已取消，不能再次修改。</view>
+  <block wx:if="{{ready}}">
+    <view class="card">
+      <view class="field"><view class="label">安排主播</view><picker range="{{memberOptions}}" range-key="display_name" value="{{memberIndex + 1}}" bindchange="memberChange" disabled="{{busy || uncertain || cancelled || !members.length}}"><view class="picker">{{memberIndex < 0 ? (removedMemberName ? removedMemberName + '（已退出）' : '请选择主播') : members[memberIndex].display_name}} ▾</view></picker><view wx:if="{{removedMemberName && memberIndex < 0}}" class="warning">原主播已退出。若需改派，请明确选择新主播；仅查看不会改变历史归属。</view></view>
+      <view class="field"><view class="label">直播间</view><picker range="{{roomOptions}}" range-key="name" value="{{roomIndex + 1}}" bindchange="roomChange" disabled="{{busy || uncertain || cancelled || !rooms.length}}"><view class="picker">{{roomIndex < 0 ? '请选择直播间' : rooms[roomIndex].name}} ▾</view></picker><view wx:if="{{roomWarning}}" class="warning">{{roomWarning}}</view><view wx:if="{{!rooms.length}}" class="muted">暂无可用直播间，请返回排班页新增直播间。</view></view>
+      <view class="field"><view class="label">{{!id && (copyMode || repeatEnabled) ? '场次模板开始日期与时间' : '开始日期与时间'}}</view><view class="row">
+        <picker class="grow" mode="date" value="{{startDate}}" data-field="startDate" bindchange="change" disabled="{{busy || uncertain || cancelled}}"><view class="picker">{{startDate}}</view></picker>
+        <picker mode="time" value="{{startTime}}" data-field="startTime" bindchange="change" disabled="{{busy || uncertain || cancelled}}"><view class="picker">{{startTime}}</view></picker>
+      </view></view>
+      <view class="field"><view class="label">{{!id && (copyMode || repeatEnabled) ? '场次模板结束日期与时间' : '结束日期与时间'}} · 跨天请修改日期</view><view class="row">
+        <picker class="grow" mode="date" value="{{endDate}}" data-field="endDate" bindchange="change" disabled="{{busy || uncertain || cancelled}}"><view class="picker">{{endDate}}</view></picker>
+        <picker mode="time" value="{{endTime}}" data-field="endTime" bindchange="change" disabled="{{busy || uncertain || cancelled}}"><view class="picker">{{endTime}}</view></picker>
+      </view></view>
+      <view class="field"><view class="label">备注 · 选填</view><textarea value="{{note}}" data-field="note" bindinput="change" maxlength="500" placeholder="记录这一场的工作内容…" disabled="{{busy || uncertain || cancelled}}" /></view>
+      <view class="row"><text class="muted">本次时长</text><text class="section" style="margin:0">{{preview}}</text></view>
+      <view wx:if="{{validation}}" class="warning">{{validation}}</view>
+    </view>
+    <view wx:if="{{!id}}" class="card repeat-card">
+      <view class="row"><view class="section" style="margin:0">按周重复</view><switch checked="{{repeatEnabled}}" bindchange="toggleRepeat" disabled="{{busy || uncertain}}" color="#16664e" aria-label="启用按周重复排班" /></view>
+      <view class="muted repeat-help">一次生成独立场次，每批最多60场。模板决定每场时段，实际日期以预览为准，后续按单场编辑或取消。</view>
+      <block wx:if="{{repeatEnabled}}">
+        <view class="field"><view class="label">重复日期范围</view><view class="repeat-range"><picker mode="date" value="{{repeatStart}}" data-field="repeatStart" bindchange="repeatChange" disabled="{{busy || uncertain}}"><view class="picker">{{repeatStart}}</view></picker><text class="muted">至</text><picker mode="date" value="{{repeatEnd}}" data-field="repeatEnd" bindchange="repeatChange" disabled="{{busy || uncertain}}"><view class="picker">{{repeatEnd}}</view></picker></view></view>
+        <view class="label">每周哪些天</view>
+        <checkbox-group class="repeat-weekdays" bindchange="weekdaysChange"><label wx:for="{{weekdayOptions}}" wx:key="value" class="repeat-weekday"><checkbox value="{{item.value}}" checked="{{item.checked}}" disabled="{{busy || uncertain}}" color="#16664e" /><text>{{item.label}}</text></label></checkbox-group>
+      </block>
+      <block wx:elif="{{copyMode}}">
+        <view class="label" style="margin-top:24rpx">复制到日期</view>
+        <view class="actions"><button class="secondary small" data-kind="tomorrow" bindtap="copyShortcut" disabled="{{busy || uncertain}}">明天</button><button class="secondary small" data-kind="next-week" bindtap="copyShortcut" disabled="{{busy || uncertain}}">下周同一天</button></view>
+        <view class="repeat-date-add"><picker mode="date" value="{{targetDateDraft}}" data-field="targetDateDraft" bindchange="repeatChange" disabled="{{busy || uncertain}}"><view class="picker">{{targetDateDraft}}</view></picker><button class="text small" bindtap="addTargetDate" disabled="{{busy || uncertain}}">添加日期</button></view>
+        <view class="repeat-date-chips"><button wx:for="{{targetDates}}" wx:key="*this" class="secondary small repeat-chip" data-date="{{item}}" bindtap="removeTargetDate" disabled="{{busy || uncertain}}" aria-label="移除日期{{item}}">{{item}} ×</button></view>
+        <view class="muted">日期可多选，点击日期标签移除；以预览中的日期为准。</view>
+      </block>
+    </view>
+    <block wx:if="{{!id && (copyMode || repeatEnabled)}}">
+      <button class="secondary" bindtap="previewBatch" disabled="{{busy || uncertain || stale}}" style="margin-bottom:20rpx">预览排班</button>
+      <view wx:if="{{batchReady}}" class="card repeat-preview"><view class="section" style="margin-top:0">待保存 {{batchPreviewItems.length}} 场</view><view class="muted">保存前会再次校验成员、直播间与冲突；不会只创建一部分。</view><scroll-view scroll-y class="repeat-preview-list" style="height:{{batchPreviewItems.length * 104}}rpx"><view wx:for="{{batchPreviewItems}}" wx:key="key" class="repeat-preview-row"><text>{{item.date}}</text><text class="muted">{{item.interval}}</text></view></scroll-view></view>
+    </block>
+    <button wx:if="{{!cancelled}}" bindtap="save" loading="{{busy}}" disabled="{{busy || stale || (!id && (copyMode || repeatEnabled) && !batchReady && !uncertain)}}">{{uncertain ? '重试原保存操作' : (!id && (copyMode || repeatEnabled) ? (batchReady ? '确认保存 ' + batchPreviewItems.length + ' 场' : '请先预览排班') : '保存')}}</button>
+    <button wx:if="{{stale}}" class="secondary" bindtap="reload" style="margin-top:20rpx">载入最新排班</button>
+    <button wx:if="{{id && !cancelled}}" class="danger" bindtap="remove" disabled="{{busy || uncertain || stale}}" style="margin-top:24rpx">取消这条排班</button>
+  </block>
+  <button wx:if="{{!loading && !ready}}" class="secondary" bindtap="load">重新加载</button>
+</view>

@@ -1,0 +1,9 @@
+<view class="page">
+  <view class="header"><view class="eyebrow">TEST ACCOUNTS</view><view class="title">选择测试账号</view><view class="subtitle">所有账号都是普通用户，权限来自所加入的公司。选择账号后返回原页面登录。</view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <block wx:if="{{enabled}}">
+    <button wx:for="{{accounts}}" wx:key="account" class="account-card" data-account="{{item.account}}" bindtap="selectAccount" disabled="{{returning}}" aria-label="使用{{item.display_name}}登录"><view class="account-name">{{item.display_name}}</view><view class="account-description">{{item.description}}</view></button>
+    <button class="secondary" bindtap="cancel" disabled="{{returning}}">取消，返回上一页</button>
+  </block>
+  <view wx:else class="empty">当前未开启开发测试登录，请返回后使用微信登录。</view>
+</view>

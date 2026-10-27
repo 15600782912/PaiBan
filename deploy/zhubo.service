@@ -1,0 +1,19 @@
+[Unit]
+Description=ZhuBo API
+After=network.target
+
+[Service]
+User=zhubo
+Group=zhubo
+WorkingDirectory=/opt/zhubo/backend
+EnvironmentFile=/opt/zhubo/backend/.env
+ExecStart=/opt/zhubo/.venv/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+Restart=on-failure
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/zhubo/backend/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

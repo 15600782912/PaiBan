@@ -1,0 +1,43 @@
+page { background:#f5f7f6; color:#192b24; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:28rpx; }
+view, button, input, textarea { box-sizing:border-box; }
+.page { padding:36rpx 32rpx 64rpx; }
+.eyebrow { font-size:20rpx; letter-spacing:4rpx; color:#819087; margin-bottom:12rpx; }
+.title { font-size:48rpx; font-weight:700; letter-spacing:-1rpx; }
+.subtitle { color:#78857e; font-size:24rpx; line-height:1.7; margin-top:12rpx; }
+.header { margin-bottom:32rpx; }
+.row { display:flex; align-items:center; justify-content:space-between; gap:16rpx; }
+.grow { flex:1; min-width:0; }
+.card { background:white; border:1rpx solid #e8eeea; border-radius:24rpx; padding:28rpx; margin-bottom:20rpx; }
+.hero { background:#173f32; color:white; border-radius:28rpx; padding:36rpx; margin:28rpx 0; }
+.hero .subtitle { color:#b7d2c3; }
+.metric { font-size:60rpx; font-weight:600; margin:20rpx 0 8rpx; }
+.muted { color:#78857e; font-size:24rpx; line-height:1.7; }
+.section { font-size:30rpx; font-weight:600; margin:30rpx 0 20rpx; }
+.empty { text-align:center; padding:64rpx 24rpx; color:#78857e; line-height:1.8; }
+.badge { color:#12664f; background:#edf6f0; padding:6rpx 16rpx; border-radius:10rpx; font-size:22rpx; display:inline-block; }
+.warning { background:#fff2d9; color:#9c661e; padding:10rpx 16rpx; border-radius:10rpx; font-size:23rpx; margin-top:16rpx; }
+.error { color:#a64034; background:#fceeea; border-radius:14rpx; padding:20rpx; margin:20rpx 0; font-size:25rpx; line-height:1.6; }
+button { background:#16664e; color:white; border-radius:16rpx; font-size:28rpx; font-weight:500; padding:0 26rpx; line-height:88rpx; margin:0; }
+button::after { border:0; }
+button[disabled] { background:#dde6e0; color:#8e9a92; }
+button.secondary { background:#e8eee9; color:#2c5341; }
+button.danger { background:#fbece7; color:#a34739; }
+button.small { line-height:64rpx; font-size:24rpx; padding:0 20rpx; flex-shrink:0; }
+button.text { background:transparent; color:#16664e; padding:0 12rpx; }
+.stack button { margin-top:16rpx; }
+.field { margin-bottom:28rpx; }
+.label { color:#66786d; font-size:24rpx; margin-bottom:12rpx; }
+input, textarea, .picker { background:#f2f5f3; border:1rpx solid #e5ece7; border-radius:14rpx; width:100%; padding:20rpx; min-height:84rpx; }
+textarea { height:180rpx; }
+.divider { height:1rpx; background:#edf0ed; margin:22rpx 0; }
+.actions { display:flex; gap:16rpx; margin-top:24rpx; }
+.actions button { flex:1; }
+.record-time { font-size:28rpx; font-weight:600; line-height:1.6; }
+.note { font-size:25rpx; color:#66786d; margin-top:12rpx; white-space:pre-wrap; overflow-wrap:anywhere; }
+.toolbar { margin:24rpx 0; }
+.schedule-date-bar { display:flex; align-items:center; gap:12rpx; width:100%; margin:24rpx 0; }
+.schedule-date-bar .schedule-week-button { flex:0 0 136rpx; width:136rpx; min-width:136rpx; height:72rpx; margin:0; padding:0; line-height:72rpx; font-size:24rpx; white-space:nowrap; }
+.schedule-date-picker { display:block; flex:1; min-width:0; height:72rpx; }
+.schedule-date-value { display:flex; align-items:center; justify-content:center; gap:8rpx; height:72rpx; padding:0 8rpx; border-radius:16rpx; background:#e8eee9; color:#192b24; font-size:28rpx; line-height:72rpx; white-space:nowrap; }
+.schedule-date-arrow { flex-shrink:0; color:#78857e; font-size:20rpx; }
+.cancelled { opacity:.55; }

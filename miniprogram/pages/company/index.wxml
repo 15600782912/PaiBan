@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="header"><view class="eyebrow">MY COMPANIES</view><view class="title">公司信息</view><view class="subtitle">查看公司信息、加入团队与管理成员。</view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{!loggedIn}}" class="card stack"><view class="muted">登录后，通过公司邀请码加入团队并查看排班。</view><button bindtap="login" loading="{{accountBusy}}" disabled="{{accountBusy}}">{{loginLabel}}</button></view>
+  <block wx:else>
+    <view class="row"><button class="secondary small" data-panel="join" bindtap="openPanel" disabled="{{submitting || uncertain}}">加入公司</button><button class="secondary small" data-panel="create" bindtap="openPanel" disabled="{{submitting || uncertain}}">创建公司</button></view>
+    <view wx:if="{{panel}}" class="card stack" style="margin-top:24rpx">
+      <view class="section">{{panel === 'create' ? '创建你的公司' : '输入公司邀请码'}}</view>
+      <input wx:if="{{panel === 'create'}}" value="{{companyName}}" data-field="companyName" bindinput="input" maxlength="80" placeholder="公司名称" disabled="{{submitting || uncertain}}" />
+      <input wx:else value="{{inviteCode}}" data-field="inviteCode" bindinput="input" maxlength="32" placeholder="向公司创建者获取邀请码" disabled="{{submitting || uncertain}}" />
+      <view wx:if="{{uncertain}}" class="warning">结果未确认，保留原内容重试，避免重复创建。</view>
+      <button bindtap="submitPanel" loading="{{submitting}}" disabled="{{submitting}}">{{uncertain ? '重试原操作' : (panel === 'create' ? '创建公司' : '加入公司')}}</button>
+    </view>
+    <block wx:if="{{current}}">
+      <view class="card" style="margin-top:28rpx">
+        <picker range="{{companies}}" range-key="name" value="{{companyIndex}}" bindchange="switchCompany"><view class="row"><text class="section" style="margin:0">{{current.name}}</text><text class="muted">切换 ▾</text></view></picker>
+        <view class="row" style="margin-top:20rpx"><text class="badge">{{current.role === 'owner' ? '创建者' : (current.role === 'operator' ? '可排班成员' : '普通成员')}}</text><button wx:if="{{manage}}" class="text small" bindtap="management">公司管理 ›</button><button wx:else class="text small" bindtap="leave">退出公司</button></view>
+      </view>
+      <view wx:if="{{current.role === 'owner'}}" class="card"><view class="label">公司邀请码 · 仅创建者可见</view><view class="section">{{current.invite_code}}</view><button class="secondary small" bindtap="copyCode">复制邀请码</button></view>
+
+    </block>
+    <view wx:elif="{{!loading}}" class="empty">还没有加入公司<view>输入邀请码，接收属于你的安排</view></view>
+  </block>
+</view>

@@ -1,0 +1,27 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const {groupSchedules}=require('../utils/schedule')
+const rooms=[{id:1,name:'直播间一',active:true},{id:2,name:'空直播间',active:true},{id:3,name:'旧直播间',active:false}]
+const item=(extra={})=>({id:1,room_id:1,room_name:'直播间一',user_id:2,display_name:'主播甲',start_at:'2030-01-01T23:00:00+08:00',end_at:'2030-01-02T01:00:00+08:00',minutes:120,status:'active',note:'直播',...extra})
+test('manager groups include active empty rooms and legacy unassigned records',()=>{
+  const groups=groupSchedules(rooms,[item(),item({id:2,room_id:null,room_name:null})],'2030-01-02',true)
+  assert.equal(groups.length,3)
+  assert.equal(groups[1].items.length,0)
+  assert.equal(groups[2].name,'待分配直播间')
+  assert.equal(groups[0].items[0].dayMinutes,60)
+  assert.match(groups[0].items[0].interval,/00:00.*01:00/)
+  assert.match(groups[0].items[0].carry,/前日/)
+})
+test('member groups contain only supplied own rows; archived history retains its room',()=>{
+  const groups=groupSchedules(rooms,[item({room_id:3,room_name:'旧直播间',status:'cancelled',has_room_conflict:false})],'2030-01-01',false)
+  assert.equal(groups.length,1)
+  assert.equal(groups[0].active,false)
+  assert.equal(groups[0].items[0].status,'cancelled')
+  assert.equal(groups[0].items[0].dayMinutes,60)
+  assert.match(groups[0].items[0].carry,/次日/)
+})
+test('day grouping excludes nonintersecting rows and marks conflicts',()=>{
+  const groups=groupSchedules(rooms,[item({has_room_conflict:true}),item({id:2,start_at:'2030-01-03T00:00:00+08:00',end_at:'2030-01-03T01:00:00+08:00'})],'2030-01-01',true)
+  assert.equal(groups[0].items.length,1)
+  assert.equal(groups[0].hasConflict,true)
+})

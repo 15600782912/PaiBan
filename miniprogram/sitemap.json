@@ -1,0 +1,1 @@
+{"desc":"内部个人数据页面不被索引", "rules":[{"action":"disallow", "page":"*"}]}

@@ -1,0 +1,24 @@
+<page-meta page-style="{{editorOpen ? 'overflow: hidden;' : ''}}" />
+<view class="page salary-page">
+  <view class="header"><view class="eyebrow">MY HOURLY RATES</view><view class="title">我的薪资</view><view class="subtitle">维护自己的时薪选项，仅本人可见。</view></view>
+  <view wx:if="{{error}}" class="error">{{error}}</view>
+  <view wx:if="{{!loggedIn}}" class="card stack"><view class="muted">登录后管理自己的薪资。</view><button bindtap="login" disabled="{{loading}}" loading="{{loading}}">{{loginLabel}}</button></view>
+  <block wx:else>
+    <view wx:if="{{loading}}" class="muted">正在加载…</view>
+    <view wx:for="{{items}}" wx:key="id" class="card salary-card">
+      <view bindtap="openEdit" data-id="{{item.id}}"><view class="salary-name">{{item.name}}</view><view class="salary-price">{{item.rateText}} <text>元/小时</text></view></view>
+      <view class="salary-actions"><button class="text small" bindtap="openEdit" data-id="{{item.id}}" disabled="{{busy || uncertain}}">编辑</button><button class="danger small" bindtap="remove" data-id="{{item.id}}" disabled="{{busy || uncertain}}">删除</button></view>
+    </view>
+    <view wx:if="{{!loading && !items.length}}" class="empty">还没有薪资选项<view>可添加不同场次的时薪作为参考</view></view>
+    <button bindtap="openAdd" disabled="{{loading || busy || uncertain}}">＋ 添加薪资</button>
+    <view class="muted salary-tip">薪资选项暂未关联公司排班。</view>
+  </block>
+</view>
+<view wx:if="{{editorOpen}}" class="salary-mask" bindtap="closeEditor" catchtouchmove="stopTap">
+  <view class="salary-editor" catchtap="stopTap"><view class="section" style="margin-top:0">{{editingId ? '编辑薪资' : '添加薪资'}}</view>
+    <view class="field"><view class="label">名称</view><input value="{{draft.name}}" data-field="name" bindinput="change" maxlength="80" placeholder="例如 常规场" disabled="{{busy || uncertain}}" /></view>
+    <view class="field"><view class="label">时薪 · 元/小时</view><input type="digit" value="{{draft.rate}}" data-field="rate" bindinput="change" maxlength="12" placeholder="例如 80.00" disabled="{{busy || uncertain}}" /></view>
+    <view wx:if="{{editorError}}" class="error">{{editorError}}</view><view wx:if="{{uncertain}}" class="warning">保存结果未确认，请保持原内容重试。</view>
+    <view class="actions"><button class="secondary" bindtap="closeEditor" disabled="{{busy || uncertain}}">取消</button><button bindtap="save" loading="{{busy}}" disabled="{{busy}}">{{uncertain ? '重试原保存' : '保存'}}</button></view>
+  </view>
+</view>

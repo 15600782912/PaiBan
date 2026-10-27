@@ -1,0 +1,13 @@
+.repeat-help { margin:16rpx 0 24rpx; }
+.repeat-range { display:flex; align-items:center; gap:12rpx; }
+.repeat-range picker { flex:1; min-width:0; }
+.repeat-range .picker { text-align:center; padding:18rpx 8rpx; font-size:25rpx; }
+.repeat-weekdays { display:flex; flex-wrap:wrap; gap:12rpx; margin:12rpx 0; }
+.repeat-weekday { display:flex; align-items:center; gap:4rpx; min-height:72rpx; padding:4rpx 8rpx; font-size:26rpx; }
+.repeat-date-add { display:flex; align-items:center; gap:12rpx; margin:20rpx 0; }
+.repeat-date-add picker { flex:1; min-width:0; }
+.repeat-date-add button { flex:0 0 auto; width:auto; }
+.repeat-date-chips { display:flex; flex-wrap:wrap; gap:12rpx; margin-bottom:16rpx; }
+button.repeat-chip { width:auto; margin:0; font-size:24rpx; }
+.repeat-preview-list { max-height:420rpx; margin-top:16rpx; }
+.repeat-preview-row { display:flex; flex-direction:column; gap:4rpx; padding:16rpx 0; border-bottom:1rpx solid #edf0ed; font-size:26rpx; }
